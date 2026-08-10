@@ -5,7 +5,7 @@ import { Plus, Edit2, Trash2 } from 'lucide-react';
 const Students = () => {
   const [students, setStudents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', age: '', class: '', rollNumber: '', parentContact: '' });
+  const [formData, setFormData] = useState({ name: '', age: '', class: '', section: 'A', rollNumber: '', parentContact: '' });
 
   useEffect(() => {
     fetchStudents();
@@ -21,7 +21,7 @@ const Students = () => {
     try {
       await axios.post('http://localhost:5000/api/students', formData);
       setIsModalOpen(false);
-      setFormData({ name: '', age: '', class: '', rollNumber: '', parentContact: '' });
+      setFormData({ name: '', age: '', class: '', section: 'A', rollNumber: '', parentContact: '' });
       fetchStudents();
     } catch (err) {
       alert('Error saving student');
@@ -51,6 +51,7 @@ const Students = () => {
               <th>Roll No</th>
               <th>Name</th>
               <th>Class</th>
+              <th>Section</th>
               <th>Age</th>
               <th>Contact</th>
               <th>Actions</th>
@@ -62,6 +63,7 @@ const Students = () => {
                 <td>{s.rollNumber}</td>
                 <td>{s.name}</td>
                 <td><span className="badge badge-success">Class {s.class}</span></td>
+                <td><span className="badge" style={{backgroundColor: 'var(--primary-color)'}}>{s.section || 'A'}</span></td>
                 <td>{s.age}</td>
                 <td>{s.parentContact}</td>
                 <td>
@@ -102,6 +104,15 @@ const Students = () => {
                   <div className="form-group" style={{ flex: 1 }}>
                     <label>Class (1-10)</label>
                     <input type="number" min="1" max="10" className="form-control" required value={formData.class} onChange={e => setFormData({...formData, class: e.target.value})} />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Section</label>
+                    <select className="form-control" required value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})}>
+                      <option value="A">A</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                      <option value="D">D</option>
+                    </select>
                   </div>
                 </div>
                 <div className="form-group">
