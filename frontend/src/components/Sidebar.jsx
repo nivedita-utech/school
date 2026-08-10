@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Wallet } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Wallet, CalendarCheck, IndianRupee, BookOpen, CalendarDays } from 'lucide-react';
 
 const Sidebar = () => {
   return (
@@ -25,6 +25,22 @@ const Sidebar = () => {
         <NavLink to="/salary" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
           <Wallet size={20} />
           <span>Salary</span>
+        </NavLink>
+        <NavLink to="/attendance" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+          <CalendarCheck size={20} />
+          <span>Attendance</span>
+        </NavLink>
+        <NavLink to="/fees" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+          <IndianRupee size={20} />
+          <span>Fees</span>
+        </NavLink>
+        <NavLink to="/exams" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+          <BookOpen size={20} />
+          <span>Exams</span>
+        </NavLink>
+        <NavLink to="/timetable" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+          <CalendarDays size={20} />
+          <span>Timetable</span>
         </NavLink>
       </div>
     </div>
