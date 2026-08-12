@@ -8,13 +8,13 @@ const router = express.Router();
 router.post('/student', async (req, res) => {
   try {
     const { date, class: studentClass, section, records } = req.body;
-    let attendance = await StudentAttendance.findOne({ date, class: studentClass, section });
+    let attendance = await StudentAttendance.findOne({ date, class: studentClass, section, schoolType: req.user.schoolType });
     
     if (attendance) {
       attendance.records = records;
       await attendance.save();
     } else {
-      attendance = new StudentAttendance({ date, class: studentClass, section, records });
+      attendance = new StudentAttendance({ date, class: studentClass, section, records, schoolType: req.user.schoolType });
       await attendance.save();
     }
     res.status(200).json(attendance);
@@ -26,7 +26,7 @@ router.post('/student', async (req, res) => {
 router.get('/student', async (req, res) => {
   try {
     const { date, class: studentClass, section } = req.query;
-    const query = {};
+    const query = { schoolType: req.user.schoolType };
     if (date) query.date = date;
     if (studentClass) query.class = studentClass;
     if (section) query.section = section;
@@ -42,13 +42,13 @@ router.get('/student', async (req, res) => {
 router.post('/faculty', async (req, res) => {
   try {
     const { date, records } = req.body;
-    let attendance = await FacultyAttendance.findOne({ date });
+    let attendance = await FacultyAttendance.findOne({ date, schoolType: req.user.schoolType });
     
     if (attendance) {
       attendance.records = records;
       await attendance.save();
     } else {
-      attendance = new FacultyAttendance({ date, records });
+      attendance = new FacultyAttendance({ date, records, schoolType: req.user.schoolType });
       await attendance.save();
     }
     res.status(200).json(attendance);
@@ -60,7 +60,8 @@ router.post('/faculty', async (req, res) => {
 router.get('/faculty', async (req, res) => {
   try {
     const { date } = req.query;
-    const query = date ? { date } : {};
+    const query = { schoolType: req.user.schoolType };
+    if (date) query.date = date;
     const attendance = await FacultyAttendance.find(query).populate('records.faculty');
     res.status(200).json(attendance);
   } catch (error) {

@@ -6,13 +6,13 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const { class: classNum, section, dayOfWeek, periods } = req.body;
-    let timetable = await Timetable.findOne({ class: classNum, section, dayOfWeek });
+    let timetable = await Timetable.findOne({ class: classNum, section, dayOfWeek, schoolType: req.user.schoolType });
     
     if (timetable) {
       timetable.periods = periods;
       await timetable.save();
     } else {
-      timetable = new Timetable(req.body);
+      timetable = new Timetable({ ...req.body, schoolType: req.user.schoolType });
       await timetable.save();
     }
     res.status(201).json(timetable);
@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { class: classNum, section, dayOfWeek } = req.query;
-    const query = {};
+    const query = { schoolType: req.user.schoolType };
     if (classNum) query.class = classNum;
     if (section) query.section = section;
     if (dayOfWeek) query.dayOfWeek = dayOfWeek;

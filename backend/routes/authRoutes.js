@@ -15,6 +15,7 @@ router.post('/login', async (req, res) => {
       res.json({
         _id: user._id,
         email: user.email,
+        schoolType: user.schoolType,
         token: jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret123', {
           expiresIn: '30d',
         }),

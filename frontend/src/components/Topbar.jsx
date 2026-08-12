@@ -25,7 +25,7 @@ const Topbar = () => {
           </div>
           <div>
             <p style={{ fontWeight: '600', fontSize: '0.875rem' }}>{user?.email || 'Admin User'}</p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>Administrator</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{user?.schoolType === 'junior' ? 'Junior School Admin' : 'Senior School Admin'}</p>
           </div>
         </div>
         <button className="btn-icon" onClick={logout} title="Logout" style={{ marginLeft: '8px' }}>

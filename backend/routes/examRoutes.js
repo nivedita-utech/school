@@ -7,7 +7,7 @@ const router = express.Router();
 // Exams
 router.post('/', async (req, res) => {
   try {
-    const exam = new Exam(req.body);
+    const exam = new Exam({ ...req.body, schoolType: req.user.schoolType });
     await exam.save();
     res.status(201).json(exam);
   } catch (error) {
@@ -18,7 +18,8 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { class: examClass } = req.query;
-    const query = examClass ? { class: examClass } : {};
+    const query = { schoolType: req.user.schoolType };
+    if (examClass) query.class = examClass;
     const exams = await Exam.find(query);
     res.status(200).json(exams);
   } catch (error) {
@@ -39,14 +40,14 @@ router.post('/results', async (req, res) => {
     else if (percentage >= 60) grade = 'C';
     else if (percentage >= 50) grade = 'D';
 
-    let result = await Result.findOne({ exam, student });
+    let result = await Result.findOne({ exam, student, schoolType: req.user.schoolType });
     if (result) {
       result.marksObtained = marksObtained;
       result.totalMarks = totalMarks;
       result.grade = grade;
       await result.save();
     } else {
-      result = new Result({ exam, student, marksObtained, totalMarks, grade });
+      result = new Result({ exam, student, marksObtained, totalMarks, grade, schoolType: req.user.schoolType });
       await result.save();
     }
     res.status(201).json(result);
@@ -58,7 +59,7 @@ router.post('/results', async (req, res) => {
 router.get('/results', async (req, res) => {
   try {
     const { exam, student } = req.query;
-    const query = {};
+    const query = { schoolType: req.user.schoolType };
     if (exam) query.exam = exam;
     if (student) query.student = student;
     

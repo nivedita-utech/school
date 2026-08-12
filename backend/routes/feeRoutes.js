@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const fee = new Fee(req.body);
+    const fee = new Fee({ ...req.body, schoolType: req.user.schoolType });
     await fee.save();
     res.status(201).json(fee);
   } catch (error) {
@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { student, status } = req.query;
-    const query = {};
+    const query = { schoolType: req.user.schoolType };
     if (student) query.student = student;
     if (status) query.status = status;
     
@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
 
 router.put('/:id/pay', async (req, res) => {
   try {
-    const fee = await Fee.findById(req.params.id);
+    const fee = await Fee.findOne({ _id: req.params.id, schoolType: req.user.schoolType });
     if (!fee) return res.status(404).json({ message: 'Fee record not found' });
     
     fee.status = 'Paid';
