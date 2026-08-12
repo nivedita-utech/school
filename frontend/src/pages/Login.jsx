@@ -43,7 +43,7 @@ const Login = () => {
                 type="email" 
                 className="form-control" 
                 style={{ paddingLeft: '40px' }}
-                placeholder="admin@school.com"
+                placeholder="junior@school.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required

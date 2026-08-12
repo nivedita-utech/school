@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const feeSchema = new mongoose.Schema({
+  schoolType: { type: String, enum: ['junior', 'senior'], required: true },
   student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
   amount: { type: Number, required: true },
   dueDate: { type: Date, required: true },

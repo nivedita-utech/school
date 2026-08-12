@@ -6,7 +6,7 @@ const router = express.Router();
 // Get all faculty
 router.get('/', async (req, res) => {
   try {
-    const faculty = await Faculty.find();
+    const faculty = await Faculty.find({ schoolType: req.user.schoolType });
     res.json(faculty);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 
 // Add new faculty
 router.post('/', async (req, res) => {
-  const faculty = new Faculty(req.body);
+  const faculty = new Faculty({ ...req.body, schoolType: req.user.schoolType });
   try {
     const newFaculty = await faculty.save();
     res.status(201).json(newFaculty);
@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
 // Update faculty
 router.put('/:id', async (req, res) => {
   try {
-    const updatedFaculty = await Faculty.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedFaculty = await Faculty.findOneAndUpdate({ _id: req.params.id, schoolType: req.user.schoolType }, req.body, { new: true });
     res.json(updatedFaculty);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -37,7 +37,7 @@ router.put('/:id', async (req, res) => {
 // Delete faculty
 router.delete('/:id', async (req, res) => {
   try {
-    await Faculty.findByIdAndDelete(req.params.id);
+    await Faculty.findOneAndDelete({ _id: req.params.id, schoolType: req.user.schoolType });
     res.json({ message: 'Faculty deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });

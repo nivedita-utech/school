@@ -40,15 +40,17 @@ function AppContent() {
         <Topbar />
         <div className="page-content">
           <Routes>
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
-            <Route path="/faculty" element={<ProtectedRoute><Faculty /></ProtectedRoute>} />
-            <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
-            <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
-            <Route path="/fees" element={<ProtectedRoute><Fees /></ProtectedRoute>} />
-            <Route path="/exams" element={<ProtectedRoute><Exams /></ProtectedRoute>} />
-            <Route path="/timetable" element={<ProtectedRoute><Timetable /></ProtectedRoute>} />
-            <Route path="*" element={<Navigate to="/" />} />
+              <>
+                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
+                <Route path="/faculty" element={<ProtectedRoute><Faculty /></ProtectedRoute>} />
+                <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
+                <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+                <Route path="/fees" element={<ProtectedRoute><Fees /></ProtectedRoute>} />
+                <Route path="/exams" element={<ProtectedRoute><Exams /></ProtectedRoute>} />
+                <Route path="/timetable" element={<ProtectedRoute><Timetable /></ProtectedRoute>} />
+                <Route path="*" element={<Navigate to="/" />} />
+              </>
           </Routes>
         </div>
       </div>

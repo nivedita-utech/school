@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const studentSchema = new mongoose.Schema({
+  schoolType: { type: String, enum: ['junior', 'senior'], required: true },
   name: { type: String, required: true },
   age: { type: Number, required: true },
   class: { type: Number, required: true, min: 1, max: 10 },
