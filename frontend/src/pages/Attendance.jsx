@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CalendarCheck, Users, GraduationCap, Save } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Attendance = () => {
+  const { user } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('student');
   
   // Filters
@@ -111,28 +113,32 @@ const Attendance = () => {
   return (
     <div className="page-transition">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem' }}>Attendance Management</h1>
-        <button className="btn btn-primary" onClick={saveAttendance}>
-          <Save size={18} /> Save Attendance
-        </button>
+        <h1 style={{ fontSize: '1.8rem' }}>{user?.role === 'admin' ? 'Attendance Management' : 'My Attendance'}</h1>
+        {user?.role === 'admin' && (
+          <button className="btn btn-primary" onClick={saveAttendance}>
+            <Save size={18} /> Save Attendance
+          </button>
+        )}
       </div>
 
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-        <button 
-          className={`btn ${activeTab === 'student' ? 'btn-primary' : ''}`}
-          onClick={() => setActiveTab('student')}
-          style={activeTab !== 'student' ? { backgroundColor: 'var(--bg-card)' } : {}}
-        >
-          <Users size={18} /> Student Attendance
-        </button>
-        <button 
-          className={`btn ${activeTab === 'faculty' ? 'btn-primary' : ''}`}
-          onClick={() => setActiveTab('faculty')}
-          style={activeTab !== 'faculty' ? { backgroundColor: 'var(--bg-card)' } : {}}
-        >
-          <GraduationCap size={18} /> Faculty Attendance
-        </button>
-      </div>
+      {user?.role === 'admin' && (
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+          <button 
+            className={`btn ${activeTab === 'student' ? 'btn-primary' : ''}`}
+            onClick={() => setActiveTab('student')}
+            style={activeTab !== 'student' ? { backgroundColor: 'var(--bg-card)' } : {}}
+          >
+            <Users size={18} /> Student Attendance
+          </button>
+          <button 
+            className={`btn ${activeTab === 'faculty' ? 'btn-primary' : ''}`}
+            onClick={() => setActiveTab('faculty')}
+            style={activeTab !== 'faculty' ? { backgroundColor: 'var(--bg-card)' } : {}}
+          >
+            <GraduationCap size={18} /> Faculty Attendance
+          </button>
+        </div>
+      )}
 
       <div className="card" style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
@@ -141,7 +147,7 @@ const Attendance = () => {
             <input type="date" className="form-control" value={date} onChange={e => setDate(e.target.value)} />
           </div>
           
-          {activeTab === 'student' && (
+          {activeTab === 'student' && user?.role === 'admin' && (
             <>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>Class</label>
@@ -195,6 +201,7 @@ const Attendance = () => {
                 )}
                 <td>
                   <select 
+                    disabled={user?.role !== 'admin'}
                     className="form-control" 
                     style={{ width: 'auto', 
                       backgroundColor: attendanceRecords[item._id] === 'Present' ? '#dcfce7' : 
@@ -203,7 +210,8 @@ const Attendance = () => {
                       color: attendanceRecords[item._id] === 'Present' ? '#166534' : 
                              attendanceRecords[item._id] === 'Absent' ? '#991b1b' : 
                              attendanceRecords[item._id] === 'Late' ? '#854d0e' : '#3730a3',
-                      borderColor: 'transparent'
+                      borderColor: 'transparent',
+                      appearance: user?.role !== 'admin' ? 'none' : 'auto'
                     }}
                     value={attendanceRecords[item._id] || 'Present'}
                     onChange={(e) => handleStatusChange(item._id, e.target.value)}

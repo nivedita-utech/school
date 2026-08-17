@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { BookOpen, Plus, Save } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Exams = () => {
+  const { user } = useContext(AuthContext);
   const [exams, setExams] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [examData, setExamData] = useState({ name: '', class: '', date: '' });
@@ -101,10 +103,12 @@ const Exams = () => {
   return (
     <div className="page-transition">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem' }}>Exams & Results</h1>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} /> Add New Exam
-        </button>
+        <h1 style={{ fontSize: '1.8rem' }}>{user?.role === 'admin' ? 'Exams & Results' : 'My Exams'}</h1>
+        {user?.role === 'admin' && (
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} /> Add New Exam
+          </button>
+        )}
       </div>
 
       <div className="card" style={{ marginBottom: '24px' }}>
@@ -122,10 +126,12 @@ const Exams = () => {
       {selectedExam && (
         <div className="table-container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
-            <h3>Enter Marks</h3>
-            <button className="btn btn-primary" onClick={saveResults}>
-              <Save size={18} /> Save Marks
-            </button>
+            <h3>{user?.role === 'admin' ? 'Enter Marks' : 'Exam Result'}</h3>
+            {user?.role === 'admin' && (
+              <button className="btn btn-primary" onClick={saveResults}>
+                <Save size={18} /> Save Marks
+              </button>
+            )}
           </div>
           <table>
             <thead>
@@ -151,6 +157,7 @@ const Exams = () => {
                       style={{ width: '80px', padding: '4px' }}
                       value={results[s._id]?.marksObtained || ''}
                       onChange={e => handleResultChange(s._id, 'marksObtained', e.target.value)}
+                      disabled={user?.role !== 'admin'}
                     />
                   </td>
                   <td>
@@ -160,6 +167,7 @@ const Exams = () => {
                       style={{ width: '80px', padding: '4px' }}
                       value={results[s._id]?.totalMarks || ''}
                       onChange={e => handleResultChange(s._id, 'totalMarks', e.target.value)}
+                      disabled={user?.role !== 'admin'}
                     />
                   </td>
                   <td>

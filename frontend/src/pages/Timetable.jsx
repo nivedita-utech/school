@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CalendarDays, Plus, Save, Edit2 } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Timetable = () => {
+  const { user } = useContext(AuthContext);
   const [classNum, setClassNum] = useState('1');
   const [section, setSection] = useState('A');
   const [timetables, setTimetables] = useState([]);
@@ -104,26 +106,28 @@ const Timetable = () => {
   return (
     <div className="page-transition">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem' }}>Class Timetable</h1>
+        <h1 style={{ fontSize: '1.8rem' }}>{user?.role === 'admin' ? 'Class Timetable' : 'My Timetable'}</h1>
       </div>
 
-      <div className="card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
-          <div className="form-group" style={{ marginBottom: 0, minWidth: '150px' }}>
-            <label>Class</label>
-            <input type="number" min="1" max="10" className="form-control" value={classNum} onChange={e => setClassNum(e.target.value)} />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0, minWidth: '150px' }}>
-            <label>Section</label>
-            <select className="form-control" value={section} onChange={e => setSection(e.target.value)}>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-            </select>
+      {user?.role === 'admin' && (
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
+            <div className="form-group" style={{ marginBottom: 0, minWidth: '150px' }}>
+              <label>Class</label>
+              <input type="number" min="1" max="10" className="form-control" value={classNum} onChange={e => setClassNum(e.target.value)} />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0, minWidth: '150px' }}>
+              <label>Section</label>
+              <select className="form-control" value={section} onChange={e => setSection(e.target.value)}>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
         {daysOfWeek.map(day => {
@@ -132,9 +136,11 @@ const Timetable = () => {
             <div key={day} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
                 <h3 style={{ margin: 0, color: 'var(--primary-color)' }}>{day}</h3>
-                <button className="btn-icon" onClick={() => handleOpenModal(day)}>
-                  <Edit2 size={16} />
-                </button>
+                {user?.role === 'admin' && (
+                  <button className="btn-icon" onClick={() => handleOpenModal(day)}>
+                    <Edit2 size={16} />
+                  </button>
+                )}
               </div>
               <div style={{ flex: 1 }}>
                 {schedule && schedule.periods.length > 0 ? (

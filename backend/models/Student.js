@@ -8,7 +8,9 @@ const studentSchema = new mongoose.Schema({
   section: { type: String, enum: ['A', 'B', 'C', 'D'], required: true, default: 'A' },
   rollNumber: { type: String, required: true, unique: true },
   address: { type: String },
-  parentContact: { type: String, required: true }
+  parentContact: { type: String, required: true },
+  studentEmail: { type: String, unique: true, sparse: true },
+  parentEmail: { type: String, unique: true, sparse: true }
 }, { timestamps: true });
 
 export default mongoose.model('Student', studentSchema);

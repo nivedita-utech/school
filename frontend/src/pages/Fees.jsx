@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Plus, CheckCircle, IndianRupee } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Fees = () => {
+  const { user } = useContext(AuthContext);
   const [fees, setFees] = useState([]);
   const [students, setStudents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,10 +51,12 @@ const Fees = () => {
   return (
     <div className="page-transition">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem' }}>Fee Management</h1>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} /> Add Fee Record
-        </button>
+        <h1 style={{ fontSize: '1.8rem' }}>{user?.role === 'admin' ? 'Fee Management' : 'My Fees'}</h1>
+        {user?.role === 'admin' && (
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} /> Add Fee Record
+          </button>
+        )}
       </div>
 
       <div className="table-container">
@@ -65,7 +69,7 @@ const Fees = () => {
               <th>Due Date</th>
               <th>Status</th>
               <th>Receipt No.</th>
-              <th>Action</th>
+              {user?.role === 'admin' && <th>Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -84,13 +88,15 @@ const Fees = () => {
                   </span>
                 </td>
                 <td>{f.receiptNumber || '-'}</td>
-                <td>
-                  {f.status !== 'Paid' && (
-                    <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '0.8rem' }} onClick={() => markAsPaid(f._id)}>
-                      <CheckCircle size={14} style={{ marginRight: '4px' }} /> Mark Paid
-                    </button>
-                  )}
-                </td>
+                {user?.role === 'admin' && (
+                  <td>
+                    {f.status !== 'Paid' && (
+                      <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '0.8rem' }} onClick={() => markAsPaid(f._id)}>
+                        <CheckCircle size={14} style={{ marginRight: '4px' }} /> Mark Paid
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
             {fees.length === 0 && (

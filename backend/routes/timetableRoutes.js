@@ -1,9 +1,11 @@
 import express from 'express';
 import Timetable from '../models/Timetable.js';
+import Student from '../models/Student.js';
+import { isAdmin } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+router.post('/', isAdmin, async (req, res) => {
   try {
     const { class: classNum, section, dayOfWeek, periods } = req.body;
     let timetable = await Timetable.findOne({ class: classNum, section, dayOfWeek, schoolType: req.user.schoolType });
@@ -28,6 +30,13 @@ router.get('/', async (req, res) => {
     if (classNum) query.class = classNum;
     if (section) query.section = section;
     if (dayOfWeek) query.dayOfWeek = dayOfWeek;
+    if (req.user.role === 'student' || req.user.role === 'parent') {
+      const student = await Student.findById(req.user.studentId);
+      if (student) {
+        query.class = student.class;
+        query.section = student.section;
+      }
+    }
     
     const timetables = await Timetable.find(query).populate('periods.faculty');
     res.status(200).json(timetables);
