@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Students = () => {
+  const { user } = useContext(AuthContext);
   const [students, setStudents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', age: '', class: '', section: 'A', rollNumber: '', parentContact: '' });
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({ name: '', age: '', class: '', section: 'A', rollNumber: '', parentContact: '', studentEmail: '', studentPassword: '', parentEmail: '', parentPassword: '' });
 
   useEffect(() => {
     fetchStudents();
@@ -16,12 +19,40 @@ const Students = () => {
     setStudents(res.data);
   };
 
+  const openAddModal = () => {
+    setFormData({ name: '', age: '', class: '', section: 'A', rollNumber: '', parentContact: '', studentEmail: '', studentPassword: '', parentEmail: '', parentPassword: '' });
+    setEditingId(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (student) => {
+    setFormData({ 
+      name: student.name, 
+      age: student.age, 
+      class: student.class, 
+      section: student.section || 'A', 
+      rollNumber: student.rollNumber, 
+      parentContact: student.parentContact, 
+      studentEmail: student.studentEmail || '', 
+      studentPassword: '', 
+      parentEmail: student.parentEmail || '', 
+      parentPassword: '' 
+    });
+    setEditingId(student._id);
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/students', formData);
+      if (editingId) {
+        await axios.put(`http://localhost:5000/api/students/${editingId}`, formData);
+      } else {
+        await axios.post('http://localhost:5000/api/students', formData);
+      }
       setIsModalOpen(false);
-      setFormData({ name: '', age: '', class: '', section: 'A', rollNumber: '', parentContact: '' });
+      setFormData({ name: '', age: '', class: '', section: 'A', rollNumber: '', parentContact: '', studentEmail: '', studentPassword: '', parentEmail: '', parentPassword: '' });
+      setEditingId(null);
       fetchStudents();
     } catch (err) {
       alert('Error saving student');
@@ -39,9 +70,11 @@ const Students = () => {
     <div className="page-transition">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '1.8rem' }}>Students Directory</h1>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} /> Add Student
-        </button>
+        {user?.role === 'admin' && (
+          <button className="btn btn-primary" onClick={openAddModal}>
+            <Plus size={18} /> Add Student
+          </button>
+        )}
       </div>
 
       <div className="table-container">
@@ -54,7 +87,7 @@ const Students = () => {
               <th>Section</th>
               <th>Age</th>
               <th>Contact</th>
-              <th>Actions</th>
+              {user?.role === 'admin' && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -66,12 +99,14 @@ const Students = () => {
                 <td><span className="badge" style={{backgroundColor: 'var(--primary-color)'}}>{s.section || 'A'}</span></td>
                 <td>{s.age}</td>
                 <td>{s.parentContact}</td>
-                <td>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="btn-icon" title="Edit"><Edit2 size={16} /></button>
-                    <button className="btn-icon btn-danger" onClick={() => deleteStudent(s._id)} title="Delete"><Trash2 size={16} /></button>
-                  </div>
-                </td>
+                {user?.role === 'admin' && (
+                  <td>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="btn-icon" title="Edit" onClick={() => openEditModal(s)}><Edit2 size={16} /></button>
+                      <button className="btn-icon btn-danger" onClick={() => deleteStudent(s._id)} title="Delete"><Trash2 size={16} /></button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
             {students.length === 0 && (
@@ -87,7 +122,7 @@ const Students = () => {
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h3>Add New Student</h3>
+              <h3>{editingId ? 'Edit Student' : 'Add New Student'}</h3>
               <button className="btn-icon" onClick={() => setIsModalOpen(false)}>&times;</button>
             </div>
             <form onSubmit={handleSubmit}>
@@ -115,18 +150,44 @@ const Students = () => {
                     </select>
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>Roll Number</label>
-                  <input type="text" className="form-control" required value={formData.rollNumber} onChange={e => setFormData({...formData, rollNumber: e.target.value})} />
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Roll Number</label>
+                    <input type="text" className="form-control" required value={formData.rollNumber} onChange={e => setFormData({...formData, rollNumber: e.target.value})} />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Parent Contact Phone</label>
+                    <input type="text" className="form-control" required value={formData.parentContact} onChange={e => setFormData({...formData, parentContact: e.target.value})} />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Parent Contact</label>
-                  <input type="text" className="form-control" required value={formData.parentContact} onChange={e => setFormData({...formData, parentContact: e.target.value})} />
+                
+                <h4 style={{marginTop: '16px', marginBottom: '8px', fontSize: '1rem', color: 'var(--text-color)'}}>Student Login Setup</h4>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Student Email ID</label>
+                    <input type="email" className="form-control" placeholder="student@school.com" value={formData.studentEmail} onChange={e => setFormData({...formData, studentEmail: e.target.value})} />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Student Password</label>
+                    <input type="password" className="form-control" placeholder="Minimum 6 chars" value={formData.studentPassword} onChange={e => setFormData({...formData, studentPassword: e.target.value})} />
+                  </div>
+                </div>
+
+                <h4 style={{marginTop: '16px', marginBottom: '8px', fontSize: '1rem', color: 'var(--text-color)'}}>Parent Login Setup</h4>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Parent Email ID</label>
+                    <input type="email" className="form-control" placeholder="parent@mail.com" value={formData.parentEmail} onChange={e => setFormData({...formData, parentEmail: e.target.value})} />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Parent Password</label>
+                    <input type="password" className="form-control" placeholder="Minimum 6 chars" value={formData.parentPassword} onChange={e => setFormData({...formData, parentPassword: e.target.value})} />
+                  </div>
                 </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Student</button>
+                <button type="submit" className="btn btn-primary">{editingId ? 'Update Student' : 'Save Student'}</button>
               </div>
             </form>
           </div>

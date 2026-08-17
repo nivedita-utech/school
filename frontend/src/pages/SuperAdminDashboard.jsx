@@ -1,1 +1,1 @@
-// File unused in 2-school architecture
+// This SaaS-related component has been cleared. You can safely delete it.

@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Users, GraduationCap, Wallet, TrendingUp } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Dashboard = () => {
+  const { user } = useContext(AuthContext);
   const [stats, setStats] = useState({ students: 0, faculty: 0, salaryPaid: 0 });
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (user?.role !== 'admin') return;
       try {
         const [studentRes, facultyRes, salaryRes] = await Promise.all([
           axios.get('http://localhost:5000/api/students'),
@@ -28,46 +31,50 @@ const Dashboard = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [user]);
 
   return (
     <div className="page-transition">
       <h1 style={{ marginBottom: '24px', fontSize: '1.8rem' }}>Dashboard Overview</h1>
       
       <div className="stat-grid">
-        <div className="card stat-card">
-          <div className="stat-icon" style={{ backgroundColor: 'var(--primary-color)' }}>
-            <Users size={24} />
-          </div>
-          <div className="stat-info">
-            <h3>Total Students</h3>
-            <p>{stats.students}</p>
-          </div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-icon" style={{ backgroundColor: 'var(--success)' }}>
-            <GraduationCap size={24} />
-          </div>
-          <div className="stat-info">
-            <h3>Total Faculty</h3>
-            <p>{stats.faculty}</p>
-          </div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-icon" style={{ backgroundColor: 'var(--warning)' }}>
-            <Wallet size={24} />
-          </div>
-          <div className="stat-info">
-            <h3>Total Salary Paid</h3>
-            <p>₹{stats.salaryPaid.toLocaleString()}</p>
-          </div>
-        </div>
+        {user?.role === 'admin' && (
+          <>
+            <div className="card stat-card">
+              <div className="stat-icon" style={{ backgroundColor: 'var(--primary-color)' }}>
+                <Users size={24} />
+              </div>
+              <div className="stat-info">
+                <h3>Total Students</h3>
+                <p>{stats.students}</p>
+              </div>
+            </div>
+            <div className="card stat-card">
+              <div className="stat-icon" style={{ backgroundColor: 'var(--success)' }}>
+                <GraduationCap size={24} />
+              </div>
+              <div className="stat-info">
+                <h3>Total Faculty</h3>
+                <p>{stats.faculty}</p>
+              </div>
+            </div>
+            <div className="card stat-card">
+              <div className="stat-icon" style={{ backgroundColor: 'var(--warning)' }}>
+                <Wallet size={24} />
+              </div>
+              <div className="stat-info">
+                <h3>Total Salary Paid</h3>
+                <p>₹{stats.salaryPaid.toLocaleString()}</p>
+              </div>
+            </div>
+          </>
+        )}
         <div className="card stat-card">
           <div className="stat-icon" style={{ backgroundColor: 'var(--accent-color)' }}>
             <TrendingUp size={24} />
           </div>
           <div className="stat-info">
-            <h3>Avg Attendance</h3>
+            <h3>{user?.role === 'admin' ? 'Avg Attendance' : 'My Attendance'}</h3>
             <p>94%</p>
           </div>
         </div>

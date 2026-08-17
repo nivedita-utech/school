@@ -1,11 +1,12 @@
 import express from 'express';
 import Exam from '../models/Exam.js';
 import Result from '../models/Result.js';
+import { isAdmin } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
 // Exams
-router.post('/', async (req, res) => {
+router.post('/', isAdmin, async (req, res) => {
   try {
     const exam = new Exam({ ...req.body, schoolType: req.user.schoolType });
     await exam.save();
@@ -28,7 +29,7 @@ router.get('/', async (req, res) => {
 });
 
 // Results
-router.post('/results', async (req, res) => {
+router.post('/results', isAdmin, async (req, res) => {
   try {
     const { exam, student, marksObtained, totalMarks } = req.body;
     const percentage = (marksObtained / totalMarks) * 100;
@@ -62,6 +63,10 @@ router.get('/results', async (req, res) => {
     const query = { schoolType: req.user.schoolType };
     if (exam) query.exam = exam;
     if (student) query.student = student;
+    
+    if (req.user.role === 'student' || req.user.role === 'parent') {
+      query.student = req.user.studentId;
+    }
     
     const results = await Result.find(query).populate('exam').populate('student');
     res.status(200).json(results);
